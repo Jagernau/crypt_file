@@ -1,16 +1,7 @@
 from cryptography.fernet import Fernet
 from hashlib import pbkdf2_hmac
 from base64 import urlsafe_b64encode
-""" 
-Хочу что бы программа зашифровала файл, путь и файл передаётся в 
-аргумент командной строки скрипта, --encr зашифровать; --decr расшифровать.
-
-* Через Termux widjet при нажатии на иконку показать пароли: расшифровывается 
-файл и открывается для чтения(что бы я смог скопировать и вставить)
-* Через Termux widjet при нажатии на кнопку добавить пароль: расшифровывается файл и в командной строке пишется "Добавить пароль: ..."
-
-Ключ лучше держать где нибудь в отдельной отдалённой папке и папку зашифровать. Ключ надо дублировать в Тлг.
-"""
+from config import ITERATION, HASH_NAME
 
 class MakeKey:
     """Генерирует ключ"""
@@ -20,11 +11,12 @@ class MakeKey:
 
     @property
     def key(self) -> bytes:
+        """Зашифровывает ключ"""
         return pbkdf2_hmac(
-            hash_name="sha256",
+            hash_name=HASH_NAME,
             password=self._password.encode("utf-8"),
             salt=self._salt.encode("utf-8"),
-            iterations=1000
+            iterations=ITERATION
         )
     
     @property
