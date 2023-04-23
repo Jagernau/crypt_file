@@ -1,8 +1,9 @@
-from classes_crypt import MakeKey, CryptFile
-from cryptography.fernet import InvalidToken
+from classes_crypt import MakeKey
 from os import path
 import click
 from config import DEFAULT_DIR, DEFAULT_NAME
+from functions import get_decrypt_text, get_encrypt_text
+
 
 user_salt: str = input("Введи соль: ")
 user_password: str = input("Введи пароль: ")
@@ -15,29 +16,25 @@ byte_key = MakeKey(salt=user_salt, password=user_password).key_encode64_bytes
 @click.option("-m", "--metod", type=str, help="Метод обработки файла: decrypt, encrypt")
 def main(path_to_dir: str, file_name: str, metod: str, key: bytes=byte_key):
     file_path = path.join(path_to_dir, file_name)
-    fermet = CryptFile(key)
-    try:
-        with open(file_path, "rb") as f:
-            file = f.read()
-    except FileNotFoundError:
-        print("Не верное имя файла, \nИли не верный путь")
-    else:
-        if metod == "decrypt":
-            try:
-                decrypt_file = fermet.decrypt_in_bytes(file)
-            except InvalidToken:
-                print("Неверный ключ,\nИли файл не зашифрован")
-            else:
-                while True:
-                    try:
-                        decrypt_file = fermet.decrypt_in_bytes(decrypt_file)
-                    except InvalidToken:
-                        print(decrypt_file.decode("utf-8"))
-                        break
 
-        if metod == "encrypt":
-            file_to_save = fermet.encrypt_in_bytes(file)
+    if metod == "decrypt":
+        byte_decrypt_text = get_decrypt_text(file_path, key)
+        if byte_decrypt_text is not None:
+            print(byte_decrypt_text.decode("utf-8"))
+        else:
+            print("Не раскодируется")
+
+    if metod == "encrypt":
+        byte_encrypt_text = get_encrypt_text(file_path, key)
+        if byte_encrypt_text is not None:
             with open(file_path, "wb") as f:
-                f.write(file_to_save)
+                f.write(byte_encrypt_text)
+            print("Успешно закодированно и переписанно")
+        else:
+            print("Не кодируется")
+
+    if metod == "append":
+        pass
+
 if __name__ == '__main__':
     main()
