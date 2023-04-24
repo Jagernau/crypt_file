@@ -37,7 +37,9 @@ def main(path_to_dir: str, file_name: str, metod: str):
 
         if metod == "append":
             pass
-
+        
+        else:
+            print("Не был введён метод")
 
     else:
         print("Файл не открывается")
