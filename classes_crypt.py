@@ -1,4 +1,4 @@
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from hashlib import pbkdf2_hmac
 from base64 import urlsafe_b64encode
 from config import ITERATION, HASH_NAME
@@ -30,7 +30,7 @@ class MakeKey:
         return self.key_encode64_bytes.decode("utf-8")
 
 
-class CryptFile:
+class CryptBytes:
     """Шифрует, расшифровывает текст по ключу"""
     def __init__(self, key_64encode: bytes) -> None:
         self._fernet = Fernet(key_64encode)
@@ -39,15 +39,36 @@ class CryptFile:
         """шифрует текс в формате bytes"""
         return self._fernet.encrypt(file)
 
-    def enrypt_in_str(self, file: bytes) -> str:
-        """шифрует текст в формате строка"""
-        return self._fernet.encrypt(file).decode("utf-8")
-
     def decrypt_in_bytes(self, encrypt_file: bytes) -> bytes:
         """расшифровывает текст в формате bytes"""
         return self._fernet.decrypt(encrypt_file)
-    
-    def decrypt_in_string(self, encrypt_file: bytes) -> str:
-        """расшифровывает текст в формате строка"""
-        return self._fernet.decrypt(encrypt_file).decode("utf-8")
+
+    def get_decrypt_file(self, file: bytes) -> bytes | None:
+            try:
+                decrypt_file = self.decrypt_in_bytes(file)
+            except InvalidToken:
+                print("Неверный ключ,\nИли файл не зашифрован")
+                return None
+            else:
+                while True:
+                    try:
+                        decrypt_file = self.decrypt_in_bytes(decrypt_file)
+                    except InvalidToken:
+                        return decrypt_file
+
+    def get_encrypt_file(self, file: bytes) -> bytes | None:
+            try:
+                self.decrypt_in_bytes(file)
+            except InvalidToken:
+                print("Не верный предыдущий ключ, \nИли не зашифрованный файл")
+                return None
+            else:
+                print("Файл был зашифрован до этого, ключ подходит")
+                return None
+            finally:
+                return self.encrypt_in_bytes(file)
+
+    def append_tex_in_file(self, file: bytes) -> bytes | None:
+        pass
+
 
