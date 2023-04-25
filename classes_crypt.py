@@ -69,7 +69,17 @@ class CryptBytes:
             finally:
                 return self.encrypt_in_bytes(file)
 
-    def append_tex_in_file(self, file: bytes) -> bytes | None:
-        pass
+    def append_tex_in_file(self, file: bytes, text: str) -> bytes | None:
+        decrypt_file = self.get_decrypt_file(file)
+        if decrypt_file is not None:
+            strip_text = decrypt_file.rstrip(b"\n")
+            strip_text += f"\n{text}\n".encode("utf-8")
+            return self.encrypt_in_bytes(strip_text)
+        else:
+            print("Не добавляется")
+            return None
+
+
+
 
 

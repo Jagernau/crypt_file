@@ -36,10 +36,16 @@ def main(path_to_dir: str, file_name: str, metod: str):
                 print("Не кодируется")
 
         if metod == "append":
-            pass
+            text = input("Что добавить? ")
+            fermet = CryptBytes(key)
+            appended = fermet.append_tex_in_file(file, text)
+            if appended is not None:
+                with open(path.join(path_to_dir, file_name), "wb") as f:
+                    f.write(appended)
+                print("Успешно добавленно и перекодированно")
+            else:
+                print("Не добавляется")
         
-        else:
-            print("Не был введён метод")
 
     else:
         print("Файл не открывается")
