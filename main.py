@@ -9,15 +9,15 @@ from functions import get_file_bytes
 @click.command()
 @click.option("-p", "--path_to_dir", type=str, default=DEFAULT_DIR, help="Путь до папки с файлом")
 @click.option("-f", "--file_name", type=str, default=DEFAULT_NAME, help="Имя файла")
-@click.option("-m", "--metod", type=str, help="Метод обработки файла: decrypt, encrypt")
-def main(path_to_dir: str, file_name: str, metod: str):
+@click.option("-m", "--method", type=click.Choice(["decrypt", "encrypt", "append"], case_sensitive=False), required=True,  help="Метод обработки файла: decrypt, encrypt, append")
+def main(path_to_dir: str, file_name: str, method: str):
     file = get_file_bytes(path_to_dir, file_name)
     if file is not None:
         user_salt: str = input("Введи соль: ")
         user_password: str = input("Введи пароль: ")
         key = MakeKey(salt=user_salt, password=user_password).key_encode64_bytes
 
-        if metod == "decrypt":
+        if method == "decrypt":
             fernet = CryptBytes(key)
             byte_decrypt_text = fernet.get_decrypt_file(file)
             if byte_decrypt_text is not None:
@@ -25,7 +25,7 @@ def main(path_to_dir: str, file_name: str, metod: str):
             else:
                 print("Не раскодируется")
 
-        if metod == "encrypt":
+        if method == "encrypt":
             fernet = CryptBytes(key)
             byte_encrypt_text = fernet.get_encrypt_file(file)
             if byte_encrypt_text is not None:
@@ -35,7 +35,7 @@ def main(path_to_dir: str, file_name: str, metod: str):
             else:
                 print("Не кодируется")
 
-        if metod == "append":
+        if method == "append":
             text = input("Что добавить? ")
             fermet = CryptBytes(key)
             appended = fermet.append_tex_in_file(file, text)
